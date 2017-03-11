@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import copy
 
-from django.http import JsonResponse
+from django.http import HttpResponse
+from django.core import serializers
 from django.views.generic import TemplateView
 
 from health_check.plugins import plugin_dir
@@ -27,7 +28,10 @@ class MainView(TemplateView):
         return self.render_to_response({'plugins': plugins}, status=status_code)
 
     def render_to_response_json(self, plugins, status):
-        return JsonResponse(
-            {str(p.identifier()): str(p.pretty_status()) for p in plugins},
+        data = {str(p.identifier()): str(p.pretty_status()) for p in plugins}
+        json = serializers.serialize('json', data)
+        return HttpResponse(
+            json,
+            content_type="application/json",
             status=status
         )
